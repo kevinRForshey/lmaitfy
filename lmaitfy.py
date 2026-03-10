@@ -8,7 +8,9 @@ A moderately passive-aggressive desktop app in the spirit of
 Modes:
   GUI mode (default):   python3 lmaitfy.py
   GIF export mode:      python3 lmaitfy.py --gif "Why is the sky blue?"
-  GIF + custom output:  python3 lmaitfy.py --gif "Why is the sky blue?" -o sky.gif
+  GIF + custom output:  python3 lmaitfy.py --gif "Why is the sky blue?" -o ~/Desktop/sky.gif
+
+All GIFs are saved to ~/Pictures/lmaitfy/ by default.
 
 Requirements:
   GUI mode:   Python 3.10+  (standard library only)
@@ -42,6 +44,7 @@ TITLE_BAR_BG  = "#0d2d52"
 DOT_COLORS    = ("#ff5f57", "#febc2e", "#28c840")
 
 CLAUDE_BASE   = "https://claude.ai/new"
+GIF_DIR       = Path.home() / "Pictures" / "lmaitfy"
 
 # ── Snarky remarks ──────────────────────────────────────────────────────────
 SNARKY_INTROS: list[str] = [
@@ -529,6 +532,7 @@ def generate_gif(question: str, output_path: str, snarky_index: int = 0) -> Path
 
     # ── Save GIF ────────────────────────────────────────────────────────────
     out = Path(output_path)
+    out.parent.mkdir(parents=True, exist_ok=True)
     frames[0].save(
         out,
         save_all=True,
@@ -778,9 +782,11 @@ def run_gui() -> None:
             if not q:
                 return
             import tkinter.filedialog as fd
+            GIF_DIR.mkdir(parents=True, exist_ok=True)
             path = fd.asksaveasfilename(
                 defaultextension=".gif",
                 filetypes=[("GIF files", "*.gif")],
+                initialdir=str(GIF_DIR),
                 initialfile="lmaitfy.gif",
                 title="Save GIF as…",
             )
@@ -882,8 +888,8 @@ def main() -> int:
     )
     parser.add_argument(
         "-o", "--output",
-        default="lmaitfy.gif",
-        help="Output filename for the GIF (default: lmaitfy.gif).",
+        default=str(GIF_DIR / "lmaitfy.gif"),
+        help=f"Output path for the GIF (default: {GIF_DIR / 'lmaitfy.gif'}).",
     )
     args = parser.parse_args()
 
